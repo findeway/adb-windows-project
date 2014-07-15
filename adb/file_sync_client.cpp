@@ -238,7 +238,12 @@ static int write_data_file(int fd, const char *path, syncsendbuf *sbuf)
         fprintf(stderr,"cannot open '%s': %s\n", path, strerror(errno));
         return -1;
     }
-
+	struct stat file_info;
+	if(stat(path,&file_info) != 0)
+	{
+		fprintf(stderr,"cannot stat '%s': %s\n", path, strerror(errno));
+		return -1;
+	}
     sbuf->id = ID_DATA;
     for(;;) {
         int ret;
@@ -260,6 +265,8 @@ static int write_data_file(int fd, const char *path, syncsendbuf *sbuf)
             break;
         }
         total_bytes += ret;
+		float percent = float(total_bytes)/file_info.st_size * 100;
+		fprintf(stdout,"push copying: %f%% has been transfered: %s\n", percent, path);
     }
 
     adb_close(lfd);
