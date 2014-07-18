@@ -245,6 +245,8 @@ static int write_data_file(int fd, const char *path, syncsendbuf *sbuf)
 		return -1;
 	}
     sbuf->id = ID_DATA;
+	float last_percent = 0.0f;
+	float current_percent = 0.0f;
     for(;;) {
         int ret;
 
@@ -265,8 +267,13 @@ static int write_data_file(int fd, const char *path, syncsendbuf *sbuf)
             break;
         }
         total_bytes += ret;
-		float percent = float(total_bytes)/file_info.st_size * 100;
-		fprintf(stdout,"push copying: %f%% has been transfered: %s\n", percent, path);
+		current_percent = float(total_bytes)/file_info.st_size * 100;
+		// show progress only when current_percent grows one percent
+		/*if(current_percent == 0 || int(current_percent) == 100 || (current_percent-last_percent) >= 1.0f)
+		{*/
+		fprintf(stdout,"push copying: %d%% has been transfered - %s\n", int(current_percent), path);
+		/*	last_percent = current_percent;
+		}*/
     }
 
     adb_close(lfd);
